@@ -426,9 +426,19 @@ export default function App() {
                       {article.title}
                     </a>
                   </h2>
-                  <span style={{ color: '#94A3B8', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                    {formatDate(article.published_at)}
-                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', whiteSpace: 'nowrap' }}>
+                    <span style={{ color: '#94A3B8', fontSize: '12px' }}>
+                      {formatDate(article.published_at)}
+                    </span>
+                    <a href={getSourceUrl(article.source)} target="_blank" rel="noopener noreferrer" style={{
+                      color: '#60A5FA',
+                      fontSize: '11px',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    }} onMouseEnter={(e) => (e.target.style.color = '#3B82F6')} onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}>
+                      {article.source}
+                    </a>
+                  </div>
                 </div>
 
                 <p style={{ color: '#CBD5E1', margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.5' }}>
@@ -460,18 +470,6 @@ export default function App() {
                   <span style={{ color: '#94A3B8', fontSize: '11px' }}>
                     Impact: {article.impact_score}/10
                   </span>
-                </div>
-
-                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #334155' }}>
-                  <a href={getSourceUrl(article.source)} target="_blank" rel="noopener noreferrer" style={{
-                    color: '#60A5FA',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    fontWeight: '500',
-                  }} onMouseEnter={(e) => (e.target.style.color = '#3B82F6')} onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}>
-                    Open source: {article.source}
-                  </a>
                 </div>
 
                 {article.companies && article.companies.length > 0 && (
