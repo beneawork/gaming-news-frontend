@@ -41,6 +41,7 @@ const getSourceUrl = (source) => {
     'Destructoid': 'https://www.destructoid.com',
     'GamesIndustry.biz': 'https://www.gamesindustry.biz',
     'GameSpot': 'https://www.gamespot.com',
+    'GameSpot News': 'https://www.gamespot.com',
     'Rock Paper Shotgun': 'https://www.rockpapershotgun.com',
     'r/Games': 'https://reddit.com/r/Games',
     'r/pcgaming': 'https://reddit.com/r/pcgaming',
@@ -426,18 +427,35 @@ export default function App() {
                       {article.title}
                     </a>
                   </h2>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', whiteSpace: 'nowrap' }}>
-                    <span style={{ color: '#94A3B8', fontSize: '12px' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span style={{ color: '#94A3B8', fontSize: '12px', whiteSpace: 'nowrap' }}>
                       {formatDate(article.published_at)}
                     </span>
-                    <a href={getSourceUrl(article.source)} target="_blank" rel="noopener noreferrer" style={{
-                      color: '#60A5FA',
-                      fontSize: '11px',
-                      textDecoration: 'underline',
-                      cursor: 'pointer',
-                    }} onMouseEnter={(e) => (e.target.style.color = '#3B82F6')} onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}>
+                    <button
+                      onClick={() => window.open(getSourceUrl(article.source), '_blank')}
+                      style={{
+                        backgroundColor: '#60A5FA',
+                        color: '#000',
+                        border: 'none',
+                        padding: '4px 12px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#3B82F6';
+                        e.target.style.color = '#fff';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = '#60A5FA';
+                        e.target.style.color = '#000';
+                      }}
+                    >
                       {article.source}
-                    </a>
+                    </button>
                   </div>
                 </div>
 
