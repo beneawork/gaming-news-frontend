@@ -30,6 +30,24 @@ const sentimentColors = {
   negative: '#EF4444',
 };
 
+const getSourceUrl = (source) => {
+  const sourceUrls = {
+    'Polygon News': 'https://www.polygon.com',
+    'Polygon': 'https://www.polygon.com',
+    'VG247': 'https://www.vg247.com',
+    'IGN News': 'https://www.ign.com',
+    'IGN': 'https://www.ign.com',
+    'Kotaku': 'https://kotaku.com',
+    'Destructoid': 'https://www.destructoid.com',
+    'GamesIndustry.biz': 'https://www.gamesindustry.biz',
+    'GameSpot': 'https://www.gamespot.com',
+    'Rock Paper Shotgun': 'https://www.rockpapershotgun.com',
+    'r/Games': 'https://reddit.com/r/Games',
+    'r/pcgaming': 'https://reddit.com/r/pcgaming',
+  };
+  return sourceUrls[source] || 'https://google.com/search?q=' + encodeURIComponent(source);
+};
+
 export default function App() {
   const [articles, setArticles] = useState([]);
   const [filteredArticles, setFilteredArticles] = useState([]);
@@ -428,7 +446,7 @@ export default function App() {
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                {/* Title & Source */}
+                {/* Title & Time */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px', gap: '12px' }}>
                   <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold', flex: 1 }}>
                     
@@ -486,33 +504,24 @@ export default function App() {
                     Impact: {article.impact_score}/10
                   </span>
 
-                  {/* Source - Now Clickable */}
-                  <button
-                    onClick={() => setSelectedSource(selectedSource === article.source ? null : article.source)}
+                  {/* Source - Link to source website */}
+                  
+                    href={getSourceUrl(article.source)}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
-                      backgroundColor: selectedSource === article.source ? '#3B82F6' : '#0F172A',
-                      color: selectedSource === article.source ? '#fff' : '#94A3B8',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '4px',
-                      padding: '4px 10px',
+                      color: '#94A3B8',
                       fontSize: '11px',
-                      cursor: 'pointer',
                       marginLeft: 'auto',
-                      transition: 'all 0.2s',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      transition: 'color 0.2s',
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#3B82F6';
-                      e.currentTarget.style.color = '#fff';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedSource !== article.source) {
-                        e.currentTarget.style.backgroundColor = '#0F172A';
-                        e.currentTarget.style.color = '#94A3B8';
-                      }
-                    }}
+                    onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
+                    onMouseLeave={(e) => (e.target.style.color = '#94A3B8')}
                   >
-                    {article.source}
-                  </button>
+                    📖 {article.source}
+                  </a>
                 </div>
 
                 {/* Companies */}
