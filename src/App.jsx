@@ -39,6 +39,7 @@ export default function App() {
   // Filters
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedSource, setSelectedSource] = useState(null);
   const [selectedSentiment, setSelectedSentiment] = useState(null);
   const [dateRange, setDateRange] = useState('all');
   const [minImpactScore, setMinImpactScore] = useState(0);
@@ -101,6 +102,11 @@ export default function App() {
       );
     }
 
+    // Source filter
+    if (selectedSource) {
+      filtered = filtered.filter((a) => a.source === selectedSource);
+    }
+
     // Sentiment filter
     if (selectedSentiment) {
       filtered = filtered.filter((a) => a.sentiment === selectedSentiment);
@@ -134,10 +140,14 @@ export default function App() {
     }
 
     setFilteredArticles(filtered);
-  }, [articles, selectedCategory, selectedCompany, selectedSentiment, dateRange, minImpactScore, searchQuery]);
+  }, [articles, selectedCategory, selectedCompany, selectedSource, selectedSentiment, dateRange, minImpactScore, searchQuery]);
 
   const uniqueCompanies = Array.from(
     new Set(articles.flatMap((a) => a.companies || []))
+  ).sort();
+
+  const uniqueSources = Array.from(
+    new Set(articles.map((a) => a.source))
   ).sort();
 
   const formatDate = (dateString) => {
@@ -268,6 +278,34 @@ export default function App() {
                 {uniqueCompanies.map((company) => (
                   <option key={company} value={company}>
                     {company}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Source Filter */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+                SOURCE
+              </label>
+              <select
+                value={selectedSource || ''}
+                onChange={(e) => setSelectedSource(e.target.value || null)}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#0F172A',
+                  color: '#F1F5F9',
+                  border: '1px solid #475569',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  fontSize: '12px',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="">All Sources</option>
+                {uniqueSources.map((source) => (
+                  <option key={source} value={source}>
+                    {source}
                   </option>
                 ))}
               </select>
@@ -448,10 +486,33 @@ export default function App() {
                     Impact: {article.impact_score}/10
                   </span>
 
-                  {/* Source */}
-                  <span style={{ color: '#94A3B8', fontSize: '11px', marginLeft: 'auto' }}>
+                  {/* Source - Now Clickable */}
+                  <button
+                    onClick={() => setSelectedSource(selectedSource === article.source ? null : article.source)}
+                    style={{
+                      backgroundColor: selectedSource === article.source ? '#3B82F6' : '#0F172A',
+                      color: selectedSource === article.source ? '#fff' : '#94A3B8',
+                      border: '1px solid #3B82F6',
+                      borderRadius: '4px',
+                      padding: '4px 10px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      marginLeft: 'auto',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3B82F6';
+                      e.currentTarget.style.color = '#fff';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedSource !== article.source) {
+                        e.currentTarget.style.backgroundColor = '#0F172A';
+                        e.currentTarget.style.color = '#94A3B8';
+                      }
+                    }}
+                  >
                     {article.source}
-                  </span>
+                  </button>
                 </div>
 
                 {/* Companies */}
