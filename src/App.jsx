@@ -421,16 +421,11 @@ export default function App() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '12px' }}>
-                  
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}
-                  >
-                    <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold' }}>
+                  <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold' }}>
+                    <a href={article.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
                       {article.title}
-                    </h2>
-                  </a>
+                    </a>
+                  </h2>
                   <span style={{ color: '#94A3B8', fontSize: '12px', whiteSpace: 'nowrap' }}>
                     {formatDate(article.published_at)}
                   </span>
@@ -468,20 +463,13 @@ export default function App() {
                 </div>
 
                 <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #334155' }}>
-                  
-                    href={getSourceUrl(article.source)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: '#60A5FA',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      fontWeight: '500',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
-                    onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}
-                  >
+                  <a href={getSourceUrl(article.source)} target="_blank" rel="noopener noreferrer" style={{
+                    color: '#60A5FA',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    fontWeight: '500',
+                  }} onMouseEnter={(e) => (e.target.style.color = '#3B82F6')} onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}>
                     Open source: {article.source}
                   </a>
                 </div>
