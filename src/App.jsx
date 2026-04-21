@@ -412,7 +412,6 @@ export default function App() {
                   borderRadius: '6px',
                   padding: '20px',
                   marginBottom: '16px',
-                  cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={(e) => {
@@ -425,25 +424,25 @@ export default function App() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px', gap: '12px' }}>
-                  <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold', flex: 1 }}>
-                    
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: '#F1F5F9', textDecoration: 'none' }}
-                      onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
-                      onMouseLeave={(e) => (e.target.style.color = '#F1F5F9')}
-                    >
+                  
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#F1F5F9', textDecoration: 'none', flex: 1 }}
+                    onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
+                    onMouseLeave={(e) => (e.target.style.color = '#F1F5F9')}
+                  >
+                    <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold' }}>
                       {article.title}
-                    </a>
-                  </h2>
+                    </h2>
+                  </a>
                   <span style={{ color: '#94A3B8', fontSize: '12px', whiteSpace: 'nowrap' }}>
                     {formatDate(article.published_at)}
                   </span>
                 </div>
 
                 <p style={{ color: '#CBD5E1', margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.5' }}>
-                  {article.summary || article.summary}
+                  {article.summary}
                 </p>
 
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
@@ -489,7 +488,6 @@ export default function App() {
                       textDecoration: 'underline',
                       fontWeight: '500',
                       transition: 'color 0.2s',
-                      display: 'inline-block',
                     }}
                     onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
                     onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}
