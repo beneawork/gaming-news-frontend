@@ -53,7 +53,6 @@ export default function App() {
   const [filteredArticles, setFilteredArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedSource, setSelectedSource] = useState(null);
@@ -194,7 +193,6 @@ export default function App() {
           <p style={{ color: '#CBD5E1', margin: '0 0 16px 0', fontSize: '14px' }}>
             Real-time gaming industry news • AI-powered insights
           </p>
-
           <input
             type="text"
             placeholder="Search articles, companies, keywords..."
@@ -443,28 +441,24 @@ export default function App() {
                 </p>
 
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-                  <span
-                    style={{
-                      backgroundColor: categoryColors[article.category] || '#3B82F6',
-                      color: '#000',
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                    }}
-                  >
+                  <span style={{
+                    backgroundColor: categoryColors[article.category] || '#3B82F6',
+                    color: '#000',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                  }}>
                     {categoryEmojis[article.category]} {article.category}
                   </span>
 
-                  <span
-                    style={{
-                      color: sentimentColors[article.sentiment] || '#94A3B8',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                    }}
-                  >
+                  <span style={{
+                    color: sentimentColors[article.sentiment] || '#94A3B8',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                  }}>
                     {article.sentiment}
                   </span>
 
@@ -484,7 +478,6 @@ export default function App() {
                       cursor: 'pointer',
                       textDecoration: 'underline',
                       fontWeight: '500',
-                      transition: 'color 0.2s',
                     }}
                     onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
                     onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}
