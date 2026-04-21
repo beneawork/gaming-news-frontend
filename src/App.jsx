@@ -54,7 +54,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Filters
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedSource, setSelectedSource] = useState(null);
@@ -63,7 +62,6 @@ export default function App() {
   const [minImpactScore, setMinImpactScore] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch articles from Supabase
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -89,7 +87,6 @@ export default function App() {
 
     fetchArticles();
 
-    // Subscribe to real-time updates
     const subscription = supabase
       .channel('articles')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, (payload) => {
@@ -104,33 +101,27 @@ export default function App() {
     };
   }, []);
 
-  // Apply filters
   useEffect(() => {
     let filtered = articles;
 
-    // Category filter
     if (selectedCategory) {
       filtered = filtered.filter((a) => a.category === selectedCategory);
     }
 
-    // Company filter
     if (selectedCompany) {
       filtered = filtered.filter((a) =>
         a.companies && a.companies.includes(selectedCompany)
       );
     }
 
-    // Source filter
     if (selectedSource) {
       filtered = filtered.filter((a) => a.source === selectedSource);
     }
 
-    // Sentiment filter
     if (selectedSentiment) {
       filtered = filtered.filter((a) => a.sentiment === selectedSentiment);
     }
 
-    // Date range filter
     const now = new Date();
     if (dateRange !== 'all') {
       const cutoffDate = new Date();
@@ -143,10 +134,8 @@ export default function App() {
       );
     }
 
-    // Impact score filter
     filtered = filtered.filter((a) => (a.impact_score || 0) >= minImpactScore);
 
-    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -188,7 +177,6 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0F172A' }}>
-      {/* Header */}
       <header style={{
         backgroundColor: '#1E293B',
         borderBottom: '1px solid #334155',
@@ -208,7 +196,6 @@ export default function App() {
             Real-time gaming industry news • AI-powered insights
           </p>
 
-          {/* Search Bar */}
           <input
             type="text"
             placeholder="Search articles, companies, keywords..."
@@ -228,10 +215,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '24px' }}>
-          {/* Sidebar Filters */}
           <aside style={{
             backgroundColor: '#1E293B',
             borderRadius: '8px',
@@ -244,7 +229,6 @@ export default function App() {
               Filters
             </h3>
 
-            {/* Category Filter */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
                 CATEGORY
@@ -273,7 +257,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Company Filter */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
                 COMPANY
@@ -301,7 +284,6 @@ export default function App() {
               </select>
             </div>
 
-            {/* Source Filter */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
                 SOURCE
@@ -329,7 +311,6 @@ export default function App() {
               </select>
             </div>
 
-            {/* Sentiment Filter */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
                 SENTIMENT
@@ -357,7 +338,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Date Range Filter */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
                 DATE RANGE
@@ -383,7 +363,6 @@ export default function App() {
               </select>
             </div>
 
-            {/* Impact Score Filter */}
             <div>
               <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
                 MIN IMPACT SCORE: {minImpactScore}
@@ -399,7 +378,6 @@ export default function App() {
             </div>
           </aside>
 
-          {/* Articles Feed */}
           <main>
             {loading && (
               <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
@@ -446,7 +424,6 @@ export default function App() {
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                {/* Title & Time */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px', gap: '12px' }}>
                   <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold', flex: 1 }}>
                     
@@ -465,14 +442,11 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* Summary */}
                 <p style={{ color: '#CBD5E1', margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.5' }}>
                   {article.summary || article.summary}
                 </p>
 
-                {/* Metadata */}
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-                  {/* Category Badge */}
                   <span
                     style={{
                       backgroundColor: categoryColors[article.category] || '#3B82F6',
@@ -487,7 +461,6 @@ export default function App() {
                     {categoryEmojis[article.category]} {article.category}
                   </span>
 
-                  {/* Sentiment Indicator */}
                   <span
                     style={{
                       color: sentimentColors[article.sentiment] || '#94A3B8',
@@ -499,18 +472,16 @@ export default function App() {
                     {article.sentiment}
                   </span>
 
-                  {/* Impact Score */}
                   <span style={{ color: '#94A3B8', fontSize: '11px' }}>
                     Impact: {article.impact_score}/10
                   </span>
 
-                  {/* Source - Link to source website */}
                   
                     href={getSourceUrl(article.source)}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      color: '#94A3B8',
+                      color: '#60A5FA',
                       fontSize: '11px',
                       marginLeft: 'auto',
                       cursor: 'pointer',
@@ -518,13 +489,13 @@ export default function App() {
                       transition: 'color 0.2s',
                     }}
                     onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
-                    onMouseLeave={(e) => (e.target.style.color = '#94A3B8')}
+                    onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    📖 {article.source}
+                    Visit {article.source}
                   </a>
                 </div>
 
-                {/* Companies */}
                 {article.companies && article.companies.length > 0 && (
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {article.companies.map((company) => (
