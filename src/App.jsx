@@ -1,369 +1,493 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-// Sample data with all 6 categories
-const sampleArticles = [
-  {
-    id: 1,
-    title: "Microsoft Acquires Obsidian Entertainment for $3.6 Billion",
-    source: "GamesIndustry.biz",
-    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    companies: ["Microsoft", "Obsidian Entertainment"],
-    category: "acquisition",
-    sentiment: "positive",
-    impactScore: 9,
-    summary: "Microsoft has acquired renowned RPG studio Obsidian Entertainment in a landmark deal, strengthening its first-party development portfolio.",
-    url: "#"
-  },
-  {
-    id: 2,
-    title: "Ubisoft Reports 30% Staff Reduction Amid Strategic Restructuring",
-    source: "Polygon",
-    publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-    companies: ["Ubisoft"],
-    category: "layoff",
-    sentiment: "negative",
-    impactScore: 8,
-    summary: "Ubisoft announced significant workforce reductions affecting 30% of its global staff as part of a strategic reorganization.",
-    url: "#"
-  },
-  {
-    id: 3,
-    title: "Baldur's Gate 3 Breaks 10 Million Sales Record",
-    source: "VG247",
-    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
-    companies: ["Larian Studios", "Wizards of the Coast"],
-    category: "release",
-    sentiment: "positive",
-    impactScore: 7,
-    summary: "Larian Studios' critically acclaimed RPG Baldur's Gate 3 has surpassed 10 million copies sold globally.",
-    url: "#"
-  },
-  {
-    id: 4,
-    title: "PlayStation 6 Technical Specifications Rumored to Be Revealed Next Quarter",
-    source: "IGN",
-    publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-    companies: ["Sony Interactive Entertainment"],
-    category: "business",
-    sentiment: "neutral",
-    impactScore: 6,
-    summary: "Sources suggest Sony will announce PlayStation 6 specifications in Q3, with significant performance upgrades expected.",
-    url: "#"
-  },
-  {
-    id: 5,
-    title: "New Report: Game Industry Revenue Projected to Hit $220B by 2027",
-    source: "VG247",
-    publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
-    companies: ["Newzoo"],
-    category: "trend",
-    sentiment: "positive",
-    impactScore: 5,
-    summary: "A comprehensive market analysis projects strong growth across console, PC, and cloud gaming sectors over the next three years.",
-    url: "#"
-  },
-  {
-    id: 6,
-    title: "Take-Two Interactive Announces New CEO Following Executive Leadership Transition",
-    source: "GamesIndustry.biz",
-    publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    companies: ["Take-Two Interactive"],
-    category: "leadership",
-    sentiment: "neutral",
-    impactScore: 7,
-    summary: "Take-Two Interactive has appointed a new Chief Executive Officer as part of planned leadership restructuring.",
-    url: "#"
-  },
-  {
-    id: 7,
-    title: "Square Enix Announces Final Fantasy VII Remake Part 3",
-    source: "Polygon",
-    publishedAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
-    companies: ["Square Enix"],
-    category: "release",
-    sentiment: "positive",
-    impactScore: 8,
-    summary: "Square Enix officially announces the third installment of the Final Fantasy VII Remake series with release window for 2026.",
-    url: "#"
-  },
-  {
-    id: 8,
-    title: "Rockstar Games Announces Grand Theft Auto 6 Launch Window",
-    source: "GamesIndustry.biz",
-    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    companies: ["Rockstar Games", "Take-Two Interactive"],
-    category: "release",
-    sentiment: "positive",
-    impactScore: 10,
-    summary: "Rockstar Games confirms Grand Theft Auto 6 will launch in Fall 2025 across PlayStation 5 and Xbox Series X/S.",
-    url: "#"
-  }
-];
+const supabase = createClient(
+  'https://poouvfpebbjseyuupvjg.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvb3V2ZnBlYmJqc2V5dXVwdmpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTIxNzAsImV4cCI6MjA5MjM2ODE3MH0.exob1IPKmYHQPMtA_La5PcQljqFC8fHsl3cVTfteBnY'
+);
 
-const categoryConfig = {
-  layoff: { label: 'Layoffs', color: '#EF4444', icon: '🔴' },
-  acquisition: { label: 'Acquisition', color: '#F97316', icon: '🟠' },
-  business: { label: 'Business', color: '#FBBF24', icon: '🟡' },
-  release: { label: 'Release', color: '#22C55E', icon: '🟢' },
-  trend: { label: 'Trend', color: '#3B82F6', icon: '🔵' },
-  leadership: { label: 'Leadership', color: '#A855F7', icon: '🟣' }
+const categoryColors = {
+  layoff: '#EF4444',
+  acquisition: '#F97316',
+  business: '#FBBF24',
+  release: '#22C55E',
+  trend: '#3B82F6',
+  leadership: '#A855F7',
+};
+
+const categoryEmojis = {
+  layoff: '🔴',
+  acquisition: '🟠',
+  business: '🟡',
+  release: '🟢',
+  trend: '🔵',
+  leadership: '🟣',
+};
+
+const sentimentColors = {
+  positive: '#10B981',
+  neutral: '#6B7280',
+  negative: '#EF4444',
 };
 
 export default function App() {
+  const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Filters
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedSentiment, setSelectedSentiment] = useState(null);
   const [dateRange, setDateRange] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [minImpactScore, setMinImpactScore] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Get unique companies
-  const allCompanies = [...new Set(sampleArticles.flatMap(a => a.companies))].sort();
+  // Fetch articles from Supabase
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('articles')
+          .select('*')
+          .eq('include_in_feed', true)
+          .order('published_at', { ascending: false });
 
-  // Filter articles
-  const filteredArticles = useMemo(() => {
-    return sampleArticles.filter(article => {
-      // Category filter
-      if (selectedCategory && article.category !== selectedCategory) return false;
+        if (error) throw error;
 
-      // Company filter
-      if (selectedCompanies.length > 0 && !selectedCompanies.some(c => article.companies.includes(c))) return false;
-
-      // Date filter
-      const now = new Date();
-      if (dateRange === 'today') {
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const articleDate = new Date(article.publishedAt.getFullYear(), article.publishedAt.getMonth(), article.publishedAt.getDate());
-        if (articleDate.getTime() !== today.getTime()) return false;
-      } else if (dateRange === '7days') {
-        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        if (article.publishedAt < sevenDaysAgo) return false;
-      } else if (dateRange === '30days') {
-        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        if (article.publishedAt < thirtyDaysAgo) return false;
+        setArticles(data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching articles:', err);
+        setError('Failed to load articles. Please refresh the page.');
+        setArticles([]);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Search filter
-      if (searchTerm && !article.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !article.summary.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    fetchArticles();
 
-      return true;
-    });
-  }, [selectedCategory, selectedCompanies, dateRange, searchTerm]);
+    // Subscribe to real-time updates
+    const subscription = supabase
+      .channel('articles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, (payload) => {
+        if (payload.eventType === 'INSERT' && payload.new.include_in_feed) {
+          setArticles((prev) => [payload.new, ...prev]);
+        }
+      })
+      .subscribe();
 
-  // Sort by date
-  const sortedArticles = [...filteredArticles].sort((a, b) => b.publishedAt - a.publishedAt);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
-  const formatDate = (date) => {
+  // Apply filters
+  useEffect(() => {
+    let filtered = articles;
+
+    // Category filter
+    if (selectedCategory) {
+      filtered = filtered.filter((a) => a.category === selectedCategory);
+    }
+
+    // Company filter
+    if (selectedCompany) {
+      filtered = filtered.filter((a) =>
+        a.companies && a.companies.includes(selectedCompany)
+      );
+    }
+
+    // Sentiment filter
+    if (selectedSentiment) {
+      filtered = filtered.filter((a) => a.sentiment === selectedSentiment);
+    }
+
+    // Date range filter
     const now = new Date();
-    const diffMs = now - date;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (dateRange !== 'all') {
+      const cutoffDate = new Date();
+      if (dateRange === '24h') cutoffDate.setDate(now.getDate() - 1);
+      else if (dateRange === '7d') cutoffDate.setDate(now.getDate() - 7);
+      else if (dateRange === '30d') cutoffDate.setDate(now.getDate() - 30);
 
-    if (diffHours < 1) return 'Just now';
+      filtered = filtered.filter(
+        (a) => new Date(a.published_at) >= cutoffDate
+      );
+    }
+
+    // Impact score filter
+    filtered = filtered.filter((a) => (a.impact_score || 0) >= minImpactScore);
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (a) =>
+          a.title.toLowerCase().includes(query) ||
+          a.summary.toLowerCase().includes(query) ||
+          (a.companies && a.companies.some((c) => c.toLowerCase().includes(query)))
+      );
+    }
+
+    setFilteredArticles(filtered);
+  }, [articles, selectedCategory, selectedCompany, selectedSentiment, dateRange, minImpactScore, searchQuery]);
+
+  const uniqueCompanies = Array.from(
+    new Set(articles.flatMap((a) => a.companies || []))
+  ).sort();
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMinutes = Math.floor((now - date) / 60000);
+
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    const diffHours = Math.floor(diffMinutes / 60);
     if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
     if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+    });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
+    <div style={{ minHeight: '100vh', backgroundColor: '#0F172A' }}>
       {/* Header */}
-      <div className="border-b border-slate-700 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-black text-white tracking-tight">GAME PULSE</h1>
-              <p className="text-sm text-slate-400 mt-1">Real-time gaming industry intelligence</p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-emerald-400">{sortedArticles.length}</div>
-              <div className="text-xs text-slate-400">Articles Matching</div>
-            </div>
+      <header style={{
+        backgroundColor: '#1E293B',
+        borderBottom: '1px solid #334155',
+        padding: '24px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <span style={{ fontSize: '32px' }}>🎮</span>
+            <h1 style={{ margin: 0, color: '#F1F5F9', fontSize: '28px', fontWeight: 'bold' }}>
+              GAME PULSE
+            </h1>
           </div>
+          <p style={{ color: '#CBD5E1', margin: '0 0 16px 0', fontSize: '14px' }}>
+            Real-time gaming industry news • AI-powered insights
+          </p>
 
-          {/* Search */}
-          <div className="relative">
-            <div className="absolute left-3 top-3 w-5 h-5 text-slate-500">🔍</div>
-            <input
-              type="text"
-              placeholder="Search articles..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-slate-600"
-            />
-          </div>
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="Search articles, companies, keywords..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              backgroundColor: '#0F172A',
+              border: '1px solid #475569',
+              borderRadius: '6px',
+              color: '#F1F5F9',
+              fontSize: '14px',
+              boxSizing: 'border-box',
+            }}
+          />
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* Main Content */}
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '24px' }}>
           {/* Sidebar Filters */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-28 space-y-6">
-              {/* Date Filter */}
-              <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Date Range</h3>
-                <div className="space-y-2">
-                  {[
-                    { id: 'all', label: 'All Time' },
-                    { id: 'today', label: 'Today' },
-                    { id: '7days', label: 'Last 7 Days' },
-                    { id: '30days', label: 'Last 30 Days' }
-                  ].map(option => (
-                    <button
-                      key={option.id}
-                      onClick={() => setDateRange(option.id)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        dateRange === option.id
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
-                          : 'text-slate-400 hover:bg-slate-800/50'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <aside style={{
+            backgroundColor: '#1E293B',
+            borderRadius: '8px',
+            padding: '20px',
+            height: 'fit-content',
+            position: 'sticky',
+            top: '100px',
+          }}>
+            <h3 style={{ color: '#F1F5F9', marginTop: 0, marginBottom: '16px', fontSize: '16px', fontWeight: 'bold' }}>
+              Filters
+            </h3>
 
-              {/* Category Filter */}
-              <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Category</h3>
-                <div className="space-y-2">
+            {/* Category Filter */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+                CATEGORY
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {Object.keys(categoryColors).map((cat) => (
                   <button
-                    onClick={() => setSelectedCategory(null)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      selectedCategory === null
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
-                        : 'text-slate-400 hover:bg-slate-800/50'
-                    }`}
+                    key={cat}
+                    onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                    style={{
+                      backgroundColor: selectedCategory === cat ? categoryColors[cat] : '#0F172A',
+                      color: selectedCategory === cat ? '#000' : '#CBD5E1',
+                      border: `1px solid ${categoryColors[cat]}`,
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: selectedCategory === cat ? '600' : 'normal',
+                      textTransform: 'capitalize',
+                      transition: 'all 0.2s',
+                    }}
                   >
-                    All Categories
+                    {categoryEmojis[cat]} {cat}
                   </button>
-                  {Object.entries(categoryConfig).map(([key, config]) => (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedCategory(key)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                        selectedCategory === key
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
-                          : 'text-slate-400 hover:bg-slate-800/50'
-                      }`}
-                    >
-                      <span className="text-lg">{config.icon}</span>
-                      {config.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Company Filter */}
-              <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Companies</h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {allCompanies.map(company => (
-                    <button
-                      key={company}
-                      onClick={() => setSelectedCompanies(
-                        selectedCompanies.includes(company)
-                          ? selectedCompanies.filter(c => c !== company)
-                          : [...selectedCompanies, company]
-                      )}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        selectedCompanies.includes(company)
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
-                          : 'text-slate-400 hover:bg-slate-800/50'
-                      }`}
-                    >
-                      {company}
-                    </button>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          {/* Main Feed */}
-          <div className="lg:col-span-3">
-            {sortedArticles.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-slate-400">No articles match your filters.</p>
+            {/* Company Filter */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+                COMPANY
+              </label>
+              <select
+                value={selectedCompany || ''}
+                onChange={(e) => setSelectedCompany(e.target.value || null)}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#0F172A',
+                  color: '#F1F5F9',
+                  border: '1px solid #475569',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  fontSize: '12px',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="">All Companies</option>
+                {uniqueCompanies.map((company) => (
+                  <option key={company} value={company}>
+                    {company}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sentiment Filter */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+                SENTIMENT
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {['positive', 'neutral', 'negative'].map((sent) => (
+                  <button
+                    key={sent}
+                    onClick={() => setSelectedSentiment(selectedSentiment === sent ? null : sent)}
+                    style={{
+                      backgroundColor: selectedSentiment === sent ? sentimentColors[sent] : '#0F172A',
+                      color: selectedSentiment === sent ? '#fff' : '#CBD5E1',
+                      border: `1px solid ${sentimentColors[sent]}`,
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: selectedSentiment === sent ? '600' : 'normal',
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {sent}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-4">
-                {sortedArticles.map((article, idx) => {
-                  const config = categoryConfig[article.category];
-                  return (
-                    <div
-                      key={article.id}
-                      className="group bg-slate-800/50 border border-slate-700 rounded-lg p-5 hover:bg-slate-800/80 hover:border-slate-600 transition-all hover:shadow-lg hover:shadow-slate-900/50 article-card"
-                      style={{ animationDelay: `${idx * 50}ms` }}
-                    >
-                      {/* Category Badge */}
-                      <div className="flex items-start justify-between mb-3">
-                        <span
-                          className="px-3 py-1 text-xs font-bold uppercase tracking-wide rounded text-white"
-                          style={{ backgroundColor: config.color }}
-                        >
-                          {config.label}
-                        </span>
-                        <span className="text-xs text-slate-500">{formatDate(article.publishedAt)}</span>
-                      </div>
+            </div>
 
-                      {/* Title */}
-                      <h2 className="text-lg font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">
-                        {article.title}
-                      </h2>
+            {/* Date Range Filter */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+                DATE RANGE
+              </label>
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#0F172A',
+                  color: '#F1F5F9',
+                  border: '1px solid #475569',
+                  borderRadius: '4px',
+                  padding: '8px',
+                  fontSize: '12px',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="all">All Time</option>
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+              </select>
+            </div>
 
-                      {/* Summary */}
-                      <p className="text-sm text-slate-400 mb-4">{article.summary}</p>
+            {/* Impact Score Filter */}
+            <div>
+              <label style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
+                MIN IMPACT SCORE: {minImpactScore}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                value={minImpactScore}
+                onChange={(e) => setMinImpactScore(parseInt(e.target.value))}
+                style={{ width: '100%', cursor: 'pointer' }}
+              />
+            </div>
+          </aside>
 
-                      {/* Metadata */}
-                      <div className="flex flex-wrap items-center gap-3 text-xs">
-                        {/* Companies */}
-                        <div className="flex flex-wrap gap-2">
-                          {article.companies.map(company => (
-                            <span
-                              key={company}
-                              className="px-2 py-1 bg-slate-700/50 text-slate-300 rounded border border-slate-600"
-                            >
-                              {company}
-                            </span>
-                          ))}
-                        </div>
-
-                        {/* Sentiment */}
-                        <div
-                          className="px-2 py-1 rounded border"
-                          style={{
-                            backgroundColor: article.sentiment === 'positive' ? 'rgba(34, 197, 94, 0.1)' : 
-                                           article.sentiment === 'negative' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(100, 116, 139, 0.1)',
-                            borderColor: article.sentiment === 'positive' ? '#22C55E' : 
-                                        article.sentiment === 'negative' ? '#EF4444' : '#64748B',
-                            color: article.sentiment === 'positive' ? '#22C55E' : 
-                                  article.sentiment === 'negative' ? '#EF4444' : '#94A3B8'
-                          }}
-                        >
-                          {article.sentiment.charAt(0).toUpperCase() + article.sentiment.slice(1)}
-                        </div>
-
-                        {/* Impact Score */}
-                        <div className="flex items-center gap-1 px-2 py-1 bg-slate-700/50 text-amber-300 rounded border border-slate-600">
-                          <Zap className="w-3 h-3" />
-                          {article.impactScore}/10
-                        </div>
-
-                        {/* Source */}
-                        <div className="ml-auto text-slate-500">
-                          {article.source}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* Articles Feed */}
+          <main>
+            {loading && (
+              <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
+                <p>Loading articles...</p>
               </div>
             )}
-          </div>
+
+            {error && (
+              <div style={{
+                backgroundColor: '#7F1D1D',
+                color: '#FCA5A5',
+                padding: '16px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+              }}>
+                {error}
+              </div>
+            )}
+
+            {!loading && filteredArticles.length === 0 && (
+              <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
+                <p>No articles match your filters.</p>
+              </div>
+            )}
+
+            {filteredArticles.map((article) => (
+              <article
+                key={article.id}
+                style={{
+                  backgroundColor: '#1E293B',
+                  borderLeft: `4px solid ${categoryColors[article.category] || '#3B82F6'}`,
+                  borderRadius: '6px',
+                  padding: '20px',
+                  marginBottom: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#334155';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#1E293B';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                {/* Title & Source */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px', gap: '12px' }}>
+                  <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold', flex: 1 }}>
+                    
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#F1F5F9', textDecoration: 'none' }}
+                      onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
+                      onMouseLeave={(e) => (e.target.style.color = '#F1F5F9')}
+                    >
+                      {article.title}
+                    </a>
+                  </h2>
+                  <span style={{ color: '#94A3B8', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                    {formatDate(article.published_at)}
+                  </span>
+                </div>
+
+                {/* Summary */}
+                <p style={{ color: '#CBD5E1', margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.5' }}>
+                  {article.summary || article.summary}
+                </p>
+
+                {/* Metadata */}
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
+                  {/* Category Badge */}
+                  <span
+                    style={{
+                      backgroundColor: categoryColors[article.category] || '#3B82F6',
+                      color: '#000',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {categoryEmojis[article.category]} {article.category}
+                  </span>
+
+                  {/* Sentiment Indicator */}
+                  <span
+                    style={{
+                      color: sentimentColors[article.sentiment] || '#94A3B8',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {article.sentiment}
+                  </span>
+
+                  {/* Impact Score */}
+                  <span style={{ color: '#94A3B8', fontSize: '11px' }}>
+                    Impact: {article.impact_score}/10
+                  </span>
+
+                  {/* Source */}
+                  <span style={{ color: '#94A3B8', fontSize: '11px', marginLeft: 'auto' }}>
+                    {article.source}
+                  </span>
+                </div>
+
+                {/* Companies */}
+                {article.companies && article.companies.length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {article.companies.map((company) => (
+                      <button
+                        key={company}
+                        onClick={() => setSelectedCompany(company)}
+                        style={{
+                          backgroundColor: '#0F172A',
+                          color: '#60A5FA',
+                          border: '1px solid #3B82F6',
+                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#3B82F6';
+                          e.currentTarget.style.color = '#fff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#0F172A';
+                          e.currentTarget.style.color = '#60A5FA';
+                        }}
+                      >
+                        {company}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ))}
+          </main>
         </div>
       </div>
     </div>
