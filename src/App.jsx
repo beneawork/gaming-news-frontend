@@ -475,29 +475,31 @@ export default function App() {
                   <span style={{ color: '#94A3B8', fontSize: '11px' }}>
                     Impact: {article.impact_score}/10
                   </span>
+                </div>
 
+                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #334155' }}>
                   
                     href={getSourceUrl(article.source)}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
                       color: '#60A5FA',
-                      fontSize: '11px',
-                      marginLeft: 'auto',
+                      fontSize: '12px',
                       cursor: 'pointer',
                       textDecoration: 'underline',
+                      fontWeight: '500',
                       transition: 'color 0.2s',
+                      display: 'inline-block',
                     }}
                     onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
                     onMouseLeave={(e) => (e.target.style.color = '#60A5FA')}
-                    onClick={(e) => e.stopPropagation()}
                   >
-                    Visit {article.source}
+                    Open source: {article.source}
                   </a>
                 </div>
 
                 {article.companies && article.companies.length > 0 && (
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
                     {article.companies.map((company) => (
                       <button
                         key={company}
