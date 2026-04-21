@@ -73,7 +73,6 @@ export default function App() {
           .order('published_at', { ascending: false });
 
         if (error) throw error;
-
         setArticles(data || []);
         setError(null);
       } catch (err) {
@@ -404,7 +403,7 @@ export default function App() {
             )}
 
             {filteredArticles.map((article) => (
-              <article
+              <div
                 key={article.id}
                 style={{
                   backgroundColor: '#1E293B',
@@ -423,14 +422,12 @@ export default function App() {
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '12px' }}>
                   
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: '#F1F5F9', textDecoration: 'none', flex: 1 }}
-                    onMouseEnter={(e) => (e.target.style.color = '#3B82F6')}
-                    onMouseLeave={(e) => (e.target.style.color = '#F1F5F9')}
+                    style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}
                   >
                     <h2 style={{ margin: 0, color: '#F1F5F9', fontSize: '16px', fontWeight: 'bold' }}>
                       {article.title}
@@ -526,7 +523,7 @@ export default function App() {
                     ))}
                   </div>
                 )}
-              </article>
+              </div>
             ))}
           </main>
         </div>
